@@ -11,12 +11,17 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
+import time
 from pathlib import Path
 
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Add apps directory to system path
+sys.path.insert(0, os.path.join(BASE_DIR, "apps"))
 
 # Load environment variables
 env = environ.Env()
@@ -26,7 +31,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, os.getenv("ENV_FILE", ".env")))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY", default="django-insecure-e=t^4gdgbx4ect=cxgx6)2-kuff5ms(@^l-7&s&#d2c4&cb*b6")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -43,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "account",
 ]
 
 MIDDLEWARE = [
@@ -119,10 +125,104 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# 浏览器访问静态文件时的URL前缀，用于生成静态文件的URL
 STATIC_URL = "static/"
+
+# 静态文件收集目录
+STATIC_ROOT = "resource/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# 指定用户模型
+AUTH_USER_MODEL = "account.User"
+
+# Redis caches
+REDIS_HOSTNAME = env("REDIS_HOSTNAME", default="127.0.0.1")
+REDIS_PORT = env("REDIS_PORT", default=6379)
+REDIS_PASSWORD = env("REDIS_PASSWORD", default="")
+REDIS_DB = env("REDIS_DB", default=0)
+REDIS_MAX_CONNECTIONS = env("REDIS_MAX_CONNECTIONS", default=100)
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOSTNAME}:{REDIS_PORT}/{REDIS_DB}",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "core.authentication.JWTTokenAuthentication",
+    ],
+    # 请求限流
+    "DEFAULT_THROTTLE_RATES": {
+        "sms_code": "1/min",  # 每分钟最多发送1次
+    },
+}
+
+# logger
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,  # 是否禁用已经存在的logger实例，默认True，禁用
+    "formatters": {
+        # 日志格式
+        "standard": {
+            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s",
+        },
+        "simple": {"format": "%(levelname)s %(message)s"},  # 简单格式
+    },
+    # 过滤
+    "filters": {},
+    # 定义具体处理日志的方式
+    "handlers": {
+        # 默认记录所有日志
+        "default": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(
+                os.getenv("LOG_PATH", os.path.join(BASE_DIR, "logs")), "{}.log".format(time.strftime("%Y-%m-%d"))
+            ),
+            "maxBytes": 1024 * 1024 * 5,  # 文件大小
+            "backupCount": 5,  # 备份数
+            "formatter": "standard",  # 输出格式
+            "encoding": "utf-8",  # 设置默认编码，否则打印出来汉字乱码
+        },
+        # 控制台输出
+        "console": {"level": "DEBUG", "class": "logging.StreamHandler", "formatter": "standard"},
+    },
+    # 配置用哪几种 handlers 来处理日志
+    "loggers": {
+        # 类型 为 django 处理所有类型的日志， 默认调用
+        "django": {
+            "handlers": ["default", "console"],
+            "level": "INFO",
+            "propagate": True,  # 日志是否向上级传递。True 向上级传，False 不向上级传。默认为True。
+        },
+    },
+}
+
+# JWT
+JWT_AUTH_HEADER_PREFIX = env("JWT_AUTH_HEADER_PREFIX", default="JWT")
+JWT_EXPIRATION_DELTA = env("JWT_EXPIRATION_DELTA", default=3600 * 24 * 7)
+JWT_ALGORITHM = env("JWT_ALGORITHM", default="HS256")
+JWT_VERIFY_EXPIRATION = env("JWT_VERIFY_EXPIRATION", default=True)
+JWT_LEEWAY = env("JWT_LEEWAY", default=0)
+
+# Default password
+DEFAULT_PASSWORD = env("DEFAULT_PASSWORD", default="GW2@t3idvA.7wG.")
+
+# Tencent Cloud SMS
+TENCENT_CLOUD_SMS_SDK_APPID = env("TENCENT_CLOUD_SMS_SDK_APPID")
+TENCENT_CLOUD_SMS_SECRET_ID = env("TENCENT_CLOUD_SMS_SECRET_ID")
+TENCENT_CLOUD_SMS_SECRET_KEY = env("TENCENT_CLOUD_SMS_SECRET_KEY")
+TENCENT_CLOUD_SMS_SIGN_NAME = env("TENCENT_CLOUD_SMS_SIGN_NAME")
+TENCENT_CLOUD_SMS_TEMPLATE_CODE = env("TENCENT_CLOUD_SMS_TEMPLATE_CODE")
+TENCENT_CLOUD_SMS_REGION = env("TENCENT_CLOUD_SMS_REGION")
+VERIFICATION_CODE_LENGTH = env("VERIFICATION_CODE_LENGTH", default=6)
+VERIFICATION_CODE_EXPIRE_TIME = env("VERIFICATION_CODE_EXPIRE_TIME", default=300)
