@@ -1,0 +1,31 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks    # 代码检查
+  rev: v5.0.0
+  hooks:
+    - id: trailing-whitespace # 删除多余空格
+    - id: end-of-file-fixer # 确保文件以换行符结尾
+    - id: check-yaml  # 检查 YAML 语法
+    - id: check-merge-conflict  # 防止合并冲突标记提交
+    - id: debug-statements      # 检查 `print()`、`pdb` 语句
+- repo: https://github.com/psf/black    # 代码格式化
+  rev: 24.2.0
+  hooks:
+    - id: black
+      args: [--config=./pyproject.toml]
+- repo: https://github.com/pycqa/isort    # 自动排序 import 语句
+  rev: 5.13.2
+  hooks:
+    - id: isort
+      # args: ["--profile", "black"]  # 让`isort`兼容`black`格式化，pyproject.toml集中做定制化配置
+- repo: https://github.com/pycqa/flake8   # 代码风格检查
+  rev: 6.1.0
+  hooks:
+    - id: flake8
+- repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook   # 规范 Git 提交信息
+  rev: v9.21.0
+  hooks:
+    - id: commitlint
+      stages: [commit-msg]
+      additional_dependencies: ['@commitlint/config-conventional']
