@@ -4,10 +4,12 @@ from account.models import User
 from django.conf import settings
 from django.forms import model_to_dict
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema
 from rest_framework import exceptions
 from rest_framework.views import APIView
 
-from core.authentication import AnonymousAuthentication
+from core.authentication import JWTTokenAuthentication
 from core.response import StandardResponse
 from core.stat_code import StatCode
 from libs.sms.enums import SMSTemplateType
@@ -24,9 +26,13 @@ from .throttles import SmsRateThrottle
 
 class VerificationCodeView(APIView):
 
-    authentication_classes = [AnonymousAuthentication]
     throttle_classes = [SmsRateThrottle]
 
+    @extend_schema(
+        summary="发送短信验证码",
+        description="发送短信验证码。注册、登录、修改密码、修改手机号、修改邮箱使用",
+        tags=[_("Account Management")],
+    )
     def post(self, request):
         """发送短信验证码"""
         serializer = VerificationCodeSerializer(data=request.data)
@@ -47,8 +53,8 @@ class VerificationCodeView(APIView):
 
 
 class LoginView(APIView):
-    authentication_classes = [AnonymousAuthentication]
 
+    @extend_schema(summary="账号密码登录", description="账号密码登录", tags=[_("Account Management")])
     def post(self, request):
         """账号密码登录"""
         serializer = LoginSerializer(data=request.data)
@@ -72,8 +78,8 @@ class LoginView(APIView):
 
 
 class VerificationCodeLoginView(APIView):
-    authentication_classes = [AnonymousAuthentication]
 
+    @extend_schema(summary="验证码登录", description="验证码登录", tags=[_("Account Management")])
     def post(self, request):
         serializer = VerificationCodeLoginSerializer(data=request.data)
 
@@ -107,6 +113,9 @@ class VerificationCodeLoginView(APIView):
 
 
 class AccountProfileView(APIView):
+    authentication_classes = [JWTTokenAuthentication]
+
+    @extend_schema(summary="获取账户信息", description="获取账户信息", tags=[_("Account Management")])
     def get(self, request):
         """获取账户信息"""
         user = request.user

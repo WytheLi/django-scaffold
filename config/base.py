@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "drf_spectacular",
+    "rest_framework",
     "account",
 ]
 
@@ -158,12 +160,14 @@ CACHES = {
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "core.authentication.JWTTokenAuthentication",
+        "core.authentication.AnonymousAuthentication",
+        # "rest_framework.authentication.SessionAuthentication",
     ],
     # 请求限流
     "DEFAULT_THROTTLE_RATES": {
         "sms_code": "1/min",  # 每分钟最多发送1次
     },
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 # logger
@@ -213,6 +217,23 @@ JWT_EXPIRATION_DELTA = env("JWT_EXPIRATION_DELTA", default=3600 * 24 * 7)
 JWT_ALGORITHM = env("JWT_ALGORITHM", default="HS256")
 JWT_VERIFY_EXPIRATION = env("JWT_VERIFY_EXPIRATION", default=True)
 JWT_LEEWAY = env("JWT_LEEWAY", default=0)
+
+# Swagger API文档
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Django scaffold API documentation",
+    "DESCRIPTION": "Django scaffold API 文档",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "defaultModelRendering": "model",
+        "defaultModelsExpandDepth": 2,
+    },
+    # 指定权限
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAdminUser"],
+    # 指定认证方式
+    "SERVE_AUTHENTICATION": ["rest_framework.authentication.SessionAuthentication"],
+}
 
 # Default password
 DEFAULT_PASSWORD = env("DEFAULT_PASSWORD", default="GW2@t3idvA.7wG.")

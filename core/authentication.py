@@ -44,8 +44,6 @@ class JWTTokenAuthentication(BaseAuthentication):
         auth_header_prefix = settings.JWT_AUTH_HEADER_PREFIX.lower()
 
         if not auth:
-            if settings.JWT_AUTH_COOKIE:
-                return request.COOKIES.get(settings.JWT_AUTH_COOKIE)
             return None
 
         if smart_str(auth[0].lower()) != auth_header_prefix:
