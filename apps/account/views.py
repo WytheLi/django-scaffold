@@ -25,10 +25,10 @@ from .throttles import SmsRateThrottle
 
 
 class VerificationCodeView(APIView):
-
     throttle_classes = [SmsRateThrottle]
 
     @extend_schema(
+        request=VerificationCodeSerializer,
         summary="发送短信验证码",
         description="发送短信验证码。注册、登录、修改密码、修改手机号、修改邮箱使用",
         tags=[_("Account Management")],
@@ -54,7 +54,9 @@ class VerificationCodeView(APIView):
 
 class LoginView(APIView):
 
-    @extend_schema(summary="账号密码登录", description="账号密码登录", tags=[_("Account Management")])
+    @extend_schema(
+        request=LoginSerializer, summary="账号密码登录", description="账号密码登录", tags=[_("Account Management")]
+    )
     def post(self, request):
         """账号密码登录"""
         serializer = LoginSerializer(data=request.data)
@@ -79,7 +81,12 @@ class LoginView(APIView):
 
 class VerificationCodeLoginView(APIView):
 
-    @extend_schema(summary="验证码登录", description="验证码登录", tags=[_("Account Management")])
+    @extend_schema(
+        request=VerificationCodeLoginSerializer,
+        summary="验证码登录",
+        description="验证码登录",
+        tags=[_("Account Management")],
+    )
     def post(self, request):
         serializer = VerificationCodeLoginSerializer(data=request.data)
 

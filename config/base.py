@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "drf_spectacular_sidecar",
     "drf_spectacular",
     "rest_framework",
     "account",
@@ -118,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "zh-hans"
 
-TIME_ZONE = "Etc/GMT-8"  # UTC+8
+TIME_ZONE = "Asia/Shanghai"  # UTC+8 | Etc/GMT-8
 
 USE_I18N = True
 
@@ -160,8 +161,7 @@ CACHES = {
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "core.authentication.AnonymousAuthentication",
-        # "rest_framework.authentication.SessionAuthentication",
+        "core.authentication.AnonymousAuthentication"
     ],
     # 请求限流
     "DEFAULT_THROTTLE_RATES": {
@@ -228,6 +228,9 @@ SPECTACULAR_SETTINGS = {
         "deepLinking": True,
         "defaultModelRendering": "model",
         "defaultModelsExpandDepth": 2,
+        "persistAuthorization": True,  # 添加此选项以保持授权
+        "displayRequestDuration": True,
+        "showCommonExtensions": True,
     },
     # 指定权限
     "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAdminUser"],

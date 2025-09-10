@@ -25,28 +25,33 @@ from django.contrib.auth import get_user_model
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions
-from rest_framework.authentication import BaseAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.authentication import get_authorization_header
 
 from utils.jwt_handler import jwt_decode_handler
 from utils.jwt_handler import jwt_get_user_id_from_payload_handler
 
 
-class AnonymousAuthentication(BaseAuthentication):
+class AnonymousAuthentication(TokenAuthentication):
+    keyword = settings.JWT_AUTH_HEADER_PREFIX
+
     def authenticate(self, request):
         return None, None
 
 
-class JWTTokenAuthentication(BaseAuthentication):
+class JWTTokenAuthentication(TokenAuthentication):
+    keyword = settings.JWT_AUTH_HEADER_PREFIX
 
     def get_jwt_value(self, request):
         auth = get_authorization_header(request).split()
         auth_header_prefix = settings.JWT_AUTH_HEADER_PREFIX.lower()
 
         if not auth:
+            # 没有Authorization头，返回None，让其他认证类处理
             return None
 
         if smart_str(auth[0].lower()) != auth_header_prefix:
+            # 有Authorization头，但前缀不匹配，返回None，让其他认证类处理
             return None
 
         if len(auth) == 1:
@@ -84,9 +89,14 @@ class JWTTokenAuthentication(BaseAuthentication):
         return user
 
     def authenticate(self, request):
+        """
+        Clients should authenticate by passing the token key in the "Authorization"
+        HTTP header, prepended with the string specified in the setting
+        `JWT_AUTH_HEADER_PREFIX`. For example:
+
+            Authorization: JWT eyJhbGciOiAiSFMyNTYiLCAidHlwIj
+        """
         jwt_value = self.get_jwt_value(request)
-        if jwt_value is None:
-            return None
 
         try:
             payload = jwt_decode_handler(jwt_value)
