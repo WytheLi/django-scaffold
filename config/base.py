@@ -50,8 +50,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "drf_spectacular_sidecar",
     "drf_spectacular",
+    "channels",
     "rest_framework",
     "account",
+    "im",
 ]
 
 MIDDLEWARE = [
@@ -159,10 +161,20 @@ CACHES = {
     }
 }
 
+ASGI_APPLICATION = "scaffold.asgi.application"
+
+# Channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(REDIS_HOSTNAME, REDIS_PORT)],
+        },
+    },
+}
+
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "core.authentication.AnonymousAuthentication"
-    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["core.authentication.JWTTokenAuthentication"],
     # 请求限流
     "DEFAULT_THROTTLE_RATES": {
         "sms_code": "1/min",  # 每分钟最多发送1次
@@ -250,3 +262,6 @@ TENCENT_CLOUD_SMS_TEMPLATE_CODE = env("TENCENT_CLOUD_SMS_TEMPLATE_CODE")
 TENCENT_CLOUD_SMS_REGION = env("TENCENT_CLOUD_SMS_REGION")
 VERIFICATION_CODE_LENGTH = env("VERIFICATION_CODE_LENGTH", default=6)
 VERIFICATION_CODE_EXPIRE_TIME = env("VERIFICATION_CODE_EXPIRE_TIME", default=300)
+
+# 即时聊天消息保存一周（7天）
+MESSAGE_RETENTION_DAYS = 7

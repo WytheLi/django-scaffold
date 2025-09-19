@@ -24,6 +24,7 @@ from drf_spectacular.views import SpectacularSwaggerView
 
 api_urlpatterns = [
     path("account/", include("apps.account.urls")),
+    path("im/", include("im.urls")),
 ]
 
 urlpatterns = [

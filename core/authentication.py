@@ -32,13 +32,6 @@ from utils.jwt_handler import jwt_decode_handler
 from utils.jwt_handler import jwt_get_user_id_from_payload_handler
 
 
-class AnonymousAuthentication(TokenAuthentication):
-    keyword = settings.JWT_AUTH_HEADER_PREFIX
-
-    def authenticate(self, request):
-        return None, None
-
-
 class JWTTokenAuthentication(TokenAuthentication):
     keyword = settings.JWT_AUTH_HEADER_PREFIX
 

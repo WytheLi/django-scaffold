@@ -7,9 +7,10 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
 from rest_framework import exceptions
+from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from core.authentication import JWTTokenAuthentication
 from core.response import StandardResponse
 from core.stat_code import StatCode
 from libs.sms.enums import SMSTemplateType
@@ -25,6 +26,7 @@ from .throttles import SmsRateThrottle
 
 
 class VerificationCodeView(APIView):
+    permission_classes = [AllowAny]
     throttle_classes = [SmsRateThrottle]
 
     @extend_schema(
@@ -53,6 +55,7 @@ class VerificationCodeView(APIView):
 
 
 class LoginView(APIView):
+    permission_classes = [AllowAny]
 
     @extend_schema(
         request=LoginSerializer, summary="账号密码登录", description="账号密码登录", tags=[_("Account Management")]
@@ -80,6 +83,7 @@ class LoginView(APIView):
 
 
 class VerificationCodeLoginView(APIView):
+    permission_classes = [AllowAny]
 
     @extend_schema(
         request=VerificationCodeLoginSerializer,
@@ -120,7 +124,7 @@ class VerificationCodeLoginView(APIView):
 
 
 class AccountProfileView(APIView):
-    authentication_classes = [JWTTokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(summary="获取账户信息", description="获取账户信息", tags=[_("Account Management")])
     def get(self, request):
