@@ -7,10 +7,10 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
 from rest_framework import exceptions
-from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
+from core.authentication import AnonymousAuthentication
 from core.response import StandardResponse
 from core.stat_code import StatCode
 from libs.sms.enums import SMSTemplateType
@@ -21,12 +21,14 @@ from utils.jwt_handler import jwt_payload_handler
 
 from .serializers.login import LoginSerializer
 from .serializers.login import VerificationCodeLoginSerializer
+from .serializers.register import RegisterSerializer
 from .serializers.sms import VerificationCodeSerializer
+from .tasks.send_mail import send_welcome_email
 from .throttles import SmsRateThrottle
 
 
 class VerificationCodeView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [AnonymousAuthentication]
     throttle_classes = [SmsRateThrottle]
 
     @extend_schema(
@@ -54,8 +56,30 @@ class VerificationCodeView(APIView):
         return StandardResponse(StatCode.SUCCESS)
 
 
+class RegisterView(APIView):
+    authentication_classes = [AnonymousAuthentication]
+
+    @extend_schema(
+        request=RegisterSerializer,
+        summary="用户注册",
+        description="用户注册",
+        tags=[_("Account Management")],
+    )
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        mobile = serializer.validated_data["mobile"]
+        code = serializer.validated_data["code"]
+        verify_code(mobile, code, SMSTemplateType.REGISTER.value)
+        user = serializer.save()
+
+        send_welcome_email.delay(user.id)
+        return StandardResponse(StatCode.SUCCESS)
+
+
 class LoginView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [AnonymousAuthentication]
 
     @extend_schema(
         request=LoginSerializer, summary="账号密码登录", description="账号密码登录", tags=[_("Account Management")]
@@ -83,7 +107,7 @@ class LoginView(APIView):
 
 
 class VerificationCodeLoginView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [AnonymousAuthentication]
 
     @extend_schema(
         request=VerificationCodeLoginSerializer,

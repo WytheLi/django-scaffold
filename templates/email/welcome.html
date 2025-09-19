@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>欢迎加入 {{ site_name }}</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2 style="color: #3498db;">欢迎加入 {{ site_name }}！</h2>
+    </div>
+
+    <div class="content">
+        <p>亲爱的用户，</p>
+        <p>感谢您注册 {{ site_name }}。我们很高兴有您成为我们社区的一员。</p>
+        <p>您的账户已成功创建，您现在可以开始使用我们的所有功能。</p>
+
+        <p><strong>下一步操作：</strong></p>
+        <ul>
+            <li>完善您的个人资料</li>
+            <li>探索我们的功能</li>
+            <li>如有任何问题，请联系我们的客服团队</li>
+        </ul>
+
+        <p>祝您使用愉快！</p>
+    </div>
+
+    <div class="footer">
+        <p>这是一封自动发送的邮件，请勿直接回复。</p>
+        <p>如果您没有注册 {{ site_name }}，请忽略此邮件。</p>
+        <p>&copy; {{ site_name }} {% now "Y" %}</p>
+    </div>
+</body>
+</html>

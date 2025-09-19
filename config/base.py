@@ -52,6 +52,13 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "channels",
     "rest_framework",
+    "allauth",
+    # 'allauth.account',
+    "allauth.socialaccount",  # 社交账户集成，允许用户使用第三方平台账户登录你的应用
+    "crispy_forms",  # 用于优雅地渲染Django表单，使用模板包（如Bootstrap）来样式化表单
+    "crispy_bootstrap5",  # 为 Bootstrap 5 提供模板和支持
+    "django_celery_beat",
+    "django_celery_results",
     "account",
     "im",
 ]
@@ -71,10 +78,11 @@ ROOT_URLCONF = "scaffold.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
@@ -84,7 +92,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "scaffold.wsgi.application"
-
+ASGI_APPLICATION = "scaffold.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -141,6 +149,15 @@ STATIC_ROOT = "resource/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# allauth 配置
+SITE_ID = 1
+
+# 用户认证
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",  # Django 默认认证后端
+    # 'allauth.account.auth_backends.AuthenticationBackend',    # allauth 认证后端（处理邮箱登录和第三方社交账号登录）
+]
+
 # 指定用户模型
 AUTH_USER_MODEL = "account.User"
 
@@ -151,6 +168,7 @@ REDIS_PASSWORD = env("REDIS_PASSWORD", default="")
 REDIS_DB = env("REDIS_DB", default=0)
 REDIS_MAX_CONNECTIONS = env("REDIS_MAX_CONNECTIONS", default=100)
 
+# RedisCache会将字符串pickle.dumps(b"123456")之后存储，要留意这个情况
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -161,8 +179,6 @@ CACHES = {
     }
 }
 
-ASGI_APPLICATION = "scaffold.asgi.application"
-
 # Channels
 CHANNEL_LAYERS = {
     "default": {
@@ -172,6 +188,14 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# Celery配置
+CELERY_BROKER_URL = (f"redis://:{REDIS_PASSWORD}@{REDIS_HOSTNAME}:{REDIS_PORT}/{REDIS_DB}",)
+CELERY_RESULT_BACKEND = f"redis://:{REDIS_PASSWORD}@{REDIS_HOSTNAME}:{REDIS_PORT}/{REDIS_DB}"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["core.authentication.JWTTokenAuthentication"],
@@ -263,5 +287,18 @@ TENCENT_CLOUD_SMS_REGION = env("TENCENT_CLOUD_SMS_REGION")
 VERIFICATION_CODE_LENGTH = env("VERIFICATION_CODE_LENGTH", default=6)
 VERIFICATION_CODE_EXPIRE_TIME = env("VERIFICATION_CODE_EXPIRE_TIME", default=300)
 
+# 邮件配置
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.163.com")
+EMAIL_PORT = env("EMAIL_PORT", default=25)
+EMAIL_USE_TLS = env("EMAIL_USE_TLS", default=True)
+EMAIL_USE_SSL = env("EMAIL_USE_SSL", default=False)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="email@163.com")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="authorization_code")
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 # 即时聊天消息保存一周（7天）
 MESSAGE_RETENTION_DAYS = 7
+
+# 设置django shell环境（默认为python shell），这里设置为ipython。需安装ipython
+SHELL_PLUS = "ipython"

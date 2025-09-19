@@ -144,8 +144,8 @@ class SMSService:
             return False, "验证码错误"
 
         # 验证成功后删除相关缓存
-        # cache.delete(verification_key)
-        # cache.delete(error_count_key)
+        cache.delete(verification_key)
+        cache.delete(error_count_key)
         return True, "验证成功"
 
     def get_verification_code_ttl(self, phone_number: str, template_type: SMSTemplateType) -> Optional[int]:
