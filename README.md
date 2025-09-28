@@ -32,7 +32,14 @@ cp resource/* static/
 
 6. 启动celery
 ```bash
+# 启动 Celery Worker
 celery -A core.celery.celery_app worker -P threads -l info -P solo
+
+# 启动 Celery Beat
+celery -A core.celery.celery_app beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+# 在开发环境中（Windows环境不可用），同时启动 worker 和 beat 进行调试
+celery -A core.celery.celery_app worker --beat --loglevel=info
 ```
 
 5. 启动开发服务器
