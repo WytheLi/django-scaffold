@@ -7,21 +7,21 @@ class BaseModel(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
-    create_uid = models.ForeignKey(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         models.SET_NULL,
         null=True,
         blank=True,
-        related_name="%(class)s_create_uid",
-        db_column="create_uid",
+        related_name="%(class)s_created_by",
+        db_column="created_by",
     )
-    update_uid = models.ForeignKey(
+    updated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         models.SET_NULL,
         null=True,
         blank=True,
-        related_name="%(class)s_update_uid",
-        db_column="update_uid",
+        related_name="%(class)s_updated_by",
+        db_column="updated_by",
     )
 
     class Meta:

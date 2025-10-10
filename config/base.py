@@ -98,9 +98,32 @@ ASGI_APPLICATION = "scaffold.asgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
+    # 连接MySQL
+    # "default": {
+    #     "ENGINE": "django.db.backends.mysql",
+    #     "NAME": env("DB_NAME", default="django-scaffold"),
+    #     "USER": env("DB_USER", default="root"),
+    #     "PASSWORD": env("DB_PASSWORD", default=""),
+    #     "HOST": env("DB_HOST", default="127.0.0.1"),
+    #     "PORT": env("DB_PORT", default="3306"),
+    #     "OPTIONS": {"init_command": "SET default_storage_engine=INNODB", "charset": "utf8mb4"},
+    #     "TEST": {
+    #         "CHARSET": "utf8",
+    #         "COLLATION": "utf8_general_ci",
+    #     },
+    # },
+    # 连接PostgreSQL
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("DB_NAME", default="django-scaffold"),
+        "USER": env("DB_USER", default="postgres"),
+        "PASSWORD": env("DB_PASSWORD", default=""),
+        "HOST": env("DB_HOST", default="127.0.0.1"),
+        "PORT": env("DB_PORT", default="5432"),
+        "OPTIONS": {},
+        "TEST": {
+            "NAME": "test_django_scaffold",  # PostgreSQL 测试数据库名称
+        },
     }
 }
 
